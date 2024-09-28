@@ -1,0 +1,75 @@
+import telebot
+from faker import Faker
+import random
+
+# Initialize the bot and Faker
+bot = telebot.TeleBot('YOUR_BOT_API_TOKEN')
+fake = Faker()
+
+# Lists of random options for various fields
+car_brands = ['Toyota', 'Honda', 'BMW', 'Mercedes', 'Ford']
+phone_brands = ['Samsung', 'Apple', 'Xiaomi', 'OnePlus', 'Huawei']
+relationship_statuses = ['Single', 'Married', 'Divorced', 'In a relationship']
+occupations = ['Software Developer', 'Artist', 'Teacher', 'Engineer', 'Doctor']
+countries = ['USA', 'Canada', 'UK', 'Australia', 'South Africa']
+colors = ['Red', 'Blue', 'Green', 'Black', 'White']
+days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+hobbies = ['Reading', 'Swimming', 'Traveling', 'Gaming', 'Cooking']
+songs = ['Bohemian Rhapsody', 'Imagine', 'Stairway to Heaven', 'Hey Jude']
+places = ['Paris', 'New York', 'Tokyo', 'Rome', 'Cape Town']
+clothing_brands = ['Nike', 'Adidas', 'Zara', 'Gucci', 'Levi\'s']
+bands = ['The Beatles', 'Queen', 'Led Zeppelin', 'Coldplay', 'Pink Floyd', 'DTX','FOXLOND']
+
+# Function to generate a fictional character profile
+def generate_identity(name, surname):
+    character = {
+        "Name": f"{name} {surname}",
+        "Age": random.randint(18, 70),
+        "ID Number": fake.ssn(),
+        "Phone Number": fake.phone_number(),
+        "Home Address": fake.address(),
+        "Car": f"{random.choice(car_brands)} {fake.word()}",
+        "ISP": fake.company(),
+        "Phone Brand": random.choice(phone_brands),
+        "Relationship Status": random.choice(relationship_statuses),
+        "Country": random.choice(countries),
+        "Occupation": random.choice(occupations),
+        "Favorite Color": random.choice(colors),
+        "Favorite Number": random.randint(1, 100),
+        "Favorite Day of the Week": random.choice(days_of_week),
+        "Favorite Hobby": random.choice(hobbies),
+        "Favorite Song": random.choice(songs),
+        "Favorite Place": random.choice(places),
+        "Favorite Car": random.choice(car_brands),
+        "Favorite Clothing Brand": random.choice(clothing_brands),
+        "Sex": random.choice(['Male', 'Female']),
+        "Favorite Band": random.choice(bands)
+    }
+    return character
+
+# Format the character profile into a message
+def format_identity(character):
+    profile = "\n".join([f"{key}: {value}" for key, value in character.items()])
+    return profile
+
+# Start command handler
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Welcome! Please provide the character's name and surname (e.g., keanu Derran Freeman):")
+
+# Text message handler for name and surname input
+@bot.message_handler(func=lambda message: True)
+def get_name_surname(message):
+    try:
+        # Split input into name and surname
+        name, surname = message.text.split()
+        # Generate character identity
+        character = generate_identity(name, surname)
+        # Send the formatted profile back to the user
+        bot.send_message(message.chat.id, format_identity(character))
+    except ValueError:
+        bot.reply_to(message, "Please enter both a first name and surname (e.g., keanu Derran Freeman).")
+
+# Start the bot
+if __name__ == '__main__':
+    bot.polling()
